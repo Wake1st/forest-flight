@@ -41,6 +41,6 @@ fn check_assets(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if asset_server.get_load_state(assets.image.id()) == Some(LoadState::Loaded) {
-        next_state.set(GameState::Ready);
+        next_state.set(GameState::SpawnPlayer);
     }
 }

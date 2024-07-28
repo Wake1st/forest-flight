@@ -43,10 +43,6 @@ fn spawn_track(
             ..default()
         });
 
-        println!(
-            "flip {:?}\tleft {:?}\tright {:?}",
-            flip_colors, l_color, r_color
-        );
         flip_colors = !flip_colors;
     }
 }
