@@ -2,8 +2,9 @@ use bevy::{math::vec3, prelude::*};
 
 use crate::{player::Player, state::GameState};
 
-pub const GRAVITY: f32 = 0.06;
-const MAX_SPEED: Vec3 = vec3(5.0, 5.0, 45.0);
+pub const GRAVITY: f32 = 0.6;
+const GLIDE_MAGIC: f32 = 0.2;
+const MAX_VELOCITY: Vec3 = vec3(5.0, 5.0, 145.0);
 
 pub struct MovementPlugin;
 
@@ -56,7 +57,7 @@ fn apply_gravity(mut player: Query<&mut Transform, With<Player>>) {
         return;
     };
 
-    transform.translation.y -= GRAVITY;
+    transform.translation.y -= GRAVITY * GLIDE_MAGIC;
 }
 
 fn update_velocity(mut query: Query<(&Acceleration, &mut Velocity)>, time: Res<Time>) {
@@ -69,7 +70,7 @@ fn dampen_velocity(mut query: Query<&mut Velocity, With<Player>>) {
     let Ok(mut velocity) = query.get_single_mut() else {
         return;
     };
-    velocity.value = velocity.value.min(MAX_SPEED).max(-MAX_SPEED);
+    velocity.value = velocity.value.min(MAX_VELOCITY).max(-MAX_VELOCITY);
 }
 
 fn update_position(mut query: Query<(&Velocity, &mut Transform)>, time: Res<Time>) {
