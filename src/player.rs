@@ -4,10 +4,9 @@ use bevy_sprite3d::*;
 use crate::{assets::ImageAssets, movement::*, state::GameState};
 
 // const LIFT_SPEED: f32 = 18.0;
-// const GRAVITY: f32 = 0.0;
-const ROTATION_SPEED: f32 = 0.1;
-const PLAYER_SPEED: f32 = 0.2;
-// const MAX_SPEED: Vec3 = vec3(5.0, 1.0, 5.0);
+const ROTATION_SPEED: f32 = 0.04;
+// const PLAYER_SPEED: f32 = 0.2;
+const UPWARD_THRUST_BOOST: f32 = 4.0;
 
 pub struct PlayerPlugin;
 
@@ -90,20 +89,27 @@ fn rotate_player(
 
 //  update the movement of the player
 fn move_player(
-    mut player: Query<&mut Transform, With<Player>>,
+    mut player: Query<(&Transform, &mut Velocity), With<Player>>,
     keyboard: Res<ButtonInput<KeyCode>>,
 ) {
-    let mut transform = player.single_mut();
+    let Ok((transform, mut velocity)) = player.get_single_mut() else {
+        return;
+    };
 
-    let mut movement_factor = Vec3::ZERO;
+    //  the velocity must be based on how "downward" the player is moving
+    let downward_amount = transform.forward().dot(Vec3::Y);
+    velocity.value.z += downward_amount * GRAVITY;
+    println!(
+        "down: {:?}\t| vel: {:?}\t| trans: {:?}",
+        downward_amount, velocity.value, transform.translation
+    );
+    // if velocity.value.z > 0.0 {
+    //     velocity.value.z = 0.0;
+    // }
 
+    //  player must be able to lift themselves (just a debug, or a feature?)
     if keyboard.pressed(KeyCode::Space) {
-        movement_factor.z -= PLAYER_SPEED;
-    }
-
-    if movement_factor != Vec3::ZERO {
-        let rotation = transform.rotation;
-        transform.translation += rotation * movement_factor;
+        velocity.value.z -= GRAVITY * UPWARD_THRUST_BOOST;
     }
 }
 
@@ -156,11 +162,4 @@ fn move_player(
 //     // momentum.x = acceleration.value.dot(-x_direction);
 
 //     acceleration.value += delta;
-// }
-
-// fn dampen_velocity(mut query: Query<&mut Velocity, With<Player>>) {
-//     let Ok(mut velocity) = query.get_single_mut() else {
-//         return;
-//     };
-//     velocity.value = velocity.value.min(MAX_SPEED).max(-MAX_SPEED);
 // }
