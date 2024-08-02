@@ -28,7 +28,6 @@ impl Plugin for CameraPlugin {
 #[derive(Resource)]
 struct Cubemap {
     is_loaded: bool,
-    index: usize,
     image_handle: Handle<Image>,
 }
 
@@ -76,27 +75,9 @@ fn spawn_camera(
 
     commands.insert_resource(Cubemap {
         is_loaded: false,
-        index: 0,
         image_handle: skybox_handle,
     });
 }
-
-// fn camera_follow_player(
-//     player_query: Query<&Transform, With<Player>>,
-//     mut query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
-// ) {
-//     let mut transform = query.single_mut();
-
-//     for &player_transform in &player_query {
-//         let p_trans = player_transform.translation;
-//         let p_euler = player_transform.rotation.to_euler(EulerRot::YXZ);
-
-//         transform.translation.y = p_trans.y + CAM_HEIGHT;
-//         transform.translation.x = p_trans.x + CAM_DISTANCE * f32::sin(p_euler.0);
-//         transform.translation.z = p_trans.z + CAM_DISTANCE * f32::cos(p_euler.0);
-//         transform.look_at(Vec3::new(p_trans.x, 0.0, p_trans.z), Vec3::Y);
-//     }
-// }
 
 fn asset_loaded(
     asset_server: Res<AssetServer>,
@@ -123,3 +104,20 @@ fn asset_loaded(
         cubemap.is_loaded = true;
     }
 }
+
+// fn camera_follow_player(
+//     player_query: Query<&Transform, With<Player>>,
+//     mut query: Query<&mut Transform, (With<Camera>, Without<Player>)>,
+// ) {
+//     let mut transform = query.single_mut();
+
+//     for &player_transform in &player_query {
+//         let p_trans = player_transform.translation;
+//         let p_euler = player_transform.rotation.to_euler(EulerRot::YXZ);
+
+//         transform.translation.y = p_trans.y + CAM_HEIGHT;
+//         transform.translation.x = p_trans.x + CAM_DISTANCE * f32::sin(p_euler.0);
+//         transform.translation.z = p_trans.z + CAM_DISTANCE * f32::cos(p_euler.0);
+//         transform.look_at(Vec3::new(p_trans.x, 0.0, p_trans.z), Vec3::Y);
+//     }
+// }

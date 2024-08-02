@@ -1,5 +1,8 @@
 use bevy::{math::vec3, prelude::*};
+use bevy_sprite3d::{Sprite3d, Sprite3dParams};
 use rand::prelude::*;
+
+use crate::assets::LargeImageAssets;
 
 pub struct TestTrackPlugin;
 
@@ -21,8 +24,8 @@ struct TrackSection {
 
 fn spawn_track(
     mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
+    images: Res<LargeImageAssets>,
+    mut sprite_params: Sprite3dParams,
 ) {
     let sections: &[TrackSection; TRACK_SECTIONS] = &[
         TrackSection {
@@ -88,35 +91,39 @@ fn spawn_track(
         points.extend(positions);
     }
 
-    let pink = Color::hsv(326.0, 1.0, 1.0);
-    let green = Color::hsv(146.0, 1.0, 1.0);
-    let mut flip_colors: bool = false;
+    let atlas = TextureAtlas {
+        layout: images.layout.clone(),
+        index: (0) as usize,
+    };
 
     for p in points {
-        let l_color: Color = if flip_colors { pink } else { green };
-        let r_color: Color = if flip_colors { green } else { pink };
-
-        commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(Cuboid::from_size(Vec3::splat(1.0)))),
-            material: materials.add(l_color),
-            transform: Transform::from_xyz(
-                TRACK_SPACING * (TRACK_POSITION.x + p.x + TRACK_BOUNDS),
-                TRACK_SPACING * (TRACK_POSITION.y + p.y),
-                TRACK_SPACING * (TRACK_POSITION.z + p.z),
-            ),
-            ..default()
-        });
-        commands.spawn(PbrBundle {
-            mesh: meshes.add(Mesh::from(Cuboid::from_size(Vec3::splat(1.0)))),
-            material: materials.add(r_color),
-            transform: Transform::from_xyz(
-                TRACK_SPACING * (TRACK_POSITION.x + p.x - TRACK_BOUNDS),
-                TRACK_SPACING * (TRACK_POSITION.y + p.y),
-                TRACK_SPACING * (TRACK_POSITION.z + p.z),
-            ),
-            ..default()
-        });
-
-        flip_colors = !flip_colors;
+        commands.spawn((
+            Sprite3d {
+                image: images.image.clone(),
+                pixels_per_metre: 16.,
+                transform: Transform::from_xyz(
+                    TRACK_SPACING * (TRACK_POSITION.x + p.x + TRACK_BOUNDS),
+                    TRACK_SPACING * (TRACK_POSITION.y + p.y),
+                    TRACK_SPACING * (TRACK_POSITION.z + p.z),
+                ),
+                ..default()
+            }
+            .bundle_with_atlas(&mut sprite_params, atlas.clone()),
+            Name::new("Tree"),
+        ));
+        commands.spawn((
+            Sprite3d {
+                image: images.image.clone(),
+                pixels_per_metre: 16.,
+                transform: Transform::from_xyz(
+                    TRACK_SPACING * (TRACK_POSITION.x + p.x - TRACK_BOUNDS),
+                    TRACK_SPACING * (TRACK_POSITION.y + p.y),
+                    TRACK_SPACING * (TRACK_POSITION.z + p.z),
+                ),
+                ..default()
+            }
+            .bundle_with_atlas(&mut sprite_params, atlas.clone()),
+            Name::new("Tree"),
+        ));
     }
 }

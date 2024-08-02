@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_sprite3d::*;
 
-use crate::{assets::ImageAssets, movement::*, state::GameState};
+use crate::{assets::SmallImageAssets, movement::*, state::GameState};
 
 // const LIFT_SPEED: f32 = 18.0;
 const ROTATION_SPEED: f32 = 0.04;
@@ -30,7 +30,7 @@ pub struct Player;
 
 fn spawn_player(
     mut commands: Commands,
-    images: Res<ImageAssets>,
+    images: Res<SmallImageAssets>,
     mut sprite_params: Sprite3dParams,
 ) {
     let atlas = TextureAtlas {
@@ -99,10 +99,6 @@ fn move_player(
     //  the velocity must be based on how "downward" the player is moving
     let downward_amount = transform.forward().dot(Vec3::Y);
     velocity.value.z += downward_amount * GRAVITY;
-
-    // if velocity.value.z > 0.0 {
-    //     velocity.value.z = 0.0;
-    // }
 
     //  player must be able to lift themselves (just a debug, or a feature?)
     if keyboard.pressed(KeyCode::Space) {
