@@ -99,10 +99,7 @@ fn move_player(
     //  the velocity must be based on how "downward" the player is moving
     let downward_amount = transform.forward().dot(Vec3::Y);
     velocity.value.z += downward_amount * GRAVITY;
-    println!(
-        "down: {:?}\t| vel: {:?}\t| trans: {:?}",
-        downward_amount, velocity.value, transform.translation
-    );
+
     // if velocity.value.z > 0.0 {
     //     velocity.value.z = 0.0;
     // }
@@ -112,54 +109,3 @@ fn move_player(
         velocity.value.z -= GRAVITY * UPWARD_THRUST_BOOST;
     }
 }
-
-// fn player_movement(
-//     mut query: Query<(&mut Acceleration, &mut Transform), With<Player>>,
-//     input: Res<ButtonInput<KeyCode>>,
-//     time: Res<Time>,
-// ) {
-//     let Ok((mut acceleration, mut transform)) = query.get_single_mut() else {
-//         return;
-//     };
-
-//     //  start with gravity
-//     acceleration.value.y -= GRAVITY;
-
-//     // gather user inputs
-//     let mut rotation_factor = 0.0;
-//     let mut movement_factor = Vec3::ZERO;
-
-//     if input.pressed(KeyCode::ArrowLeft) {
-//         rotation_factor += 1.0;
-//     }
-//     if input.pressed(KeyCode::ArrowRight) {
-//         rotation_factor -= 1.0;
-//     }
-//     if input.pressed(KeyCode::ArrowUp) {
-//         movement_factor.z -= 1.0;
-//     }
-//     if input.pressed(KeyCode::ArrowDown) {
-//         movement_factor.z += 1.0;
-//     }
-
-//     //  calculate the rotation of the player
-//     let rotation_amount = ROTATION_SPEED * time.delta_seconds();
-//     transform.rotate_y(rotation_factor * rotation_amount);
-
-//     //  calculate the movement of the player
-//     let movement_amount = PLAYER_SPEED * time.delta_seconds();
-//     let movement_distance = movement_factor * movement_amount;
-
-//     let z_direction = transform.rotation * Vec3::Z;
-//     let x_direction = transform.rotation * Vec3::X;
-
-//     let mut delta = Vec3::ZERO;
-//     delta.z = movement_distance.dot(z_direction);
-//     delta.x = movement_distance.dot(-x_direction);
-
-//     // let mut momentum = Vec3::ZERO;
-//     // momentum.z = acceleration.value.dot(z_direction);
-//     // momentum.x = acceleration.value.dot(-x_direction);
-
-//     acceleration.value += delta;
-// }
