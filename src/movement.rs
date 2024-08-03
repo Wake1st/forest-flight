@@ -2,7 +2,7 @@ use bevy::{math::vec3, prelude::*};
 
 use crate::{player::Player, state::GameState};
 
-pub const GRAVITY: f32 = 0.5;
+pub const GRAVITY: f32 = 0.6;
 const GLIDE_MAGIC: f32 = 0.2;
 const MAX_VELOCITY: Vec3 = vec3(5.0, 5.0, 145.0);
 

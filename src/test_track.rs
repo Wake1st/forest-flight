@@ -9,7 +9,7 @@ pub struct TestTrackPlugin;
 const TRACK_POSITION: Vec3 = vec3(0., -20., -10.);
 const TRACK_SPACING: f32 = 8.0;
 const TRACK_BOUNDS: f32 = 3.4;
-const TRACK_SECTIONS: usize = 15;
+const TRACK_SECTIONS: usize = 16;
 const SUBDIVISIONS: usize = 16;
 const TILE_SIZE: f32 = 0.25;
 
@@ -26,15 +26,15 @@ struct TrackSection {
     location: Vec3,
 }
 
-#[derive(Component)]
-struct FaceCamera; // tag entity to make it always face the camera
-
 fn spawn_track(
     mut commands: Commands,
     images: Res<ImageAssets>,
     mut sprite_params: Sprite3dParams,
 ) {
     let sections: &[TrackSection; TRACK_SECTIONS] = &[
+        TrackSection {
+            location: vec3(0., 5., 20.),
+        },
         TrackSection {
             location: vec3(0., 0., 0.),
         },
@@ -83,31 +83,32 @@ fn spawn_track(
     ];
 
     // Create a vector of positions for "railing"
-    let mut points: Vec<Vec3> = Vec::new();
     let mut rnd = rand::thread_rng();
-    for i in 0..=(TRACK_SECTIONS - 2) {
-        let start = sections[i].location;
-        let end = sections[i + 1].location;
-        let middle = vec3(
+    let mut gen_rand_point = |start: Vec3, end: Vec3| {
+        vec3(
             start.x.lerp(end.x, rnd.gen()),
             start.y.lerp(end.y, rnd.gen()),
             start.z.lerp(end.z, rnd.gen()),
-        );
-        let b_spline = CubicBezier::new([[start, middle, middle, end]; 1]).to_curve();
+        )
+    };
+
+    let mut entry = gen_rand_point(sections[0].location, sections[1].location);
+
+    let mut points: Vec<Vec3> = Vec::new();
+    for i in 1..=(TRACK_SECTIONS - 2) {
+        let start = sections[i].location;
+        let end = sections[i + 1].location;
+        let exit = gen_rand_point(start, end);
+
+        let b_spline = CubicBezier::new([[start, entry, exit, end]; 1]).to_curve();
         let positions: Vec<Vec3> = b_spline.iter_positions(SUBDIVISIONS).collect();
         points.extend(positions);
+
+        entry = end + end - exit;
     }
 
     let mut entity = |(x, y, z), tile_x, tile_y, height| {
         for i in 0usize..height {
-            // println!(
-            //     "xL {:?}\t| y: {:?}\t| h: {:?}\t| i: {:?}",
-            //     tile_x,
-            //     tile_y,
-            //     i,
-            //     tile_x + (tile_y + i) * 2
-            // );
-
             let atlas = TextureAtlas {
                 layout: images.layout.clone(),
                 index: (tile_x + (tile_y + i) * 2) as usize,
