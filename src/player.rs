@@ -1,11 +1,11 @@
 use bevy::prelude::*;
 use bevy_sprite3d::*;
 
-use crate::{assets::SmallImageAssets, movement::*, state::GameState};
+use crate::{assets::ImageAssets, movement::*, state::GameState};
 
 // const LIFT_SPEED: f32 = 18.0;
-const ROTATION_SPEED: f32 = 0.04;
 // const PLAYER_SPEED: f32 = 0.2;
+const ROTATION_SPEED: f32 = 0.04;
 const UPWARD_THRUST_BOOST: f32 = 4.0;
 
 pub struct PlayerPlugin;
@@ -30,7 +30,7 @@ pub struct Player;
 
 fn spawn_player(
     mut commands: Commands,
-    images: Res<SmallImageAssets>,
+    images: Res<ImageAssets>,
     mut sprite_params: Sprite3dParams,
 ) {
     let atlas = TextureAtlas {

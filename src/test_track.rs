@@ -2,7 +2,7 @@ use bevy::{math::vec3, prelude::*};
 use bevy_sprite3d::{Sprite3d, Sprite3dParams};
 use rand::prelude::*;
 
-use crate::assets::LargeImageAssets;
+use crate::{assets::ImageAssets, state::GameState};
 
 pub struct TestTrackPlugin;
 
@@ -11,10 +11,14 @@ const TRACK_SPACING: f32 = 8.0;
 const TRACK_BOUNDS: f32 = 3.4;
 const TRACK_SECTIONS: usize = 15;
 const SUBDIVISIONS: usize = 16;
+const TILE_SIZE: f32 = 0.25;
 
 impl Plugin for TestTrackPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_track);
+        app.add_systems(
+            OnEnter(GameState::SpawnPlayer),
+            spawn_track.run_if(in_state(GameState::SpawnPlayer)),
+        );
     }
 }
 
@@ -22,9 +26,12 @@ struct TrackSection {
     location: Vec3,
 }
 
+#[derive(Component)]
+struct FaceCamera; // tag entity to make it always face the camera
+
 fn spawn_track(
     mut commands: Commands,
-    images: Res<LargeImageAssets>,
+    images: Res<ImageAssets>,
     mut sprite_params: Sprite3dParams,
 ) {
     let sections: &[TrackSection; TRACK_SECTIONS] = &[
@@ -91,39 +98,53 @@ fn spawn_track(
         points.extend(positions);
     }
 
-    let atlas = TextureAtlas {
-        layout: images.layout.clone(),
-        index: (0) as usize,
+    let mut entity = |(x, y, z), tile_x, tile_y, height| {
+        for i in 0usize..height {
+            // println!(
+            //     "xL {:?}\t| y: {:?}\t| h: {:?}\t| i: {:?}",
+            //     tile_x,
+            //     tile_y,
+            //     i,
+            //     tile_x + (tile_y + i) * 2
+            // );
+
+            let atlas = TextureAtlas {
+                layout: images.layout.clone(),
+                index: (tile_x + (tile_y + i) * 2) as usize,
+            };
+
+            commands.spawn((
+                Sprite3d {
+                    image: images.image.clone(),
+                    pixels_per_metre: 16.,
+                    transform: Transform::from_xyz(
+                        TRACK_SPACING * (TRACK_POSITION.x + x + TRACK_BOUNDS),
+                        TRACK_SPACING * (TRACK_POSITION.y + y + TILE_SIZE * i as f32),
+                        TRACK_SPACING * (TRACK_POSITION.z + z),
+                    ),
+                    ..default()
+                }
+                .bundle_with_atlas(&mut sprite_params, atlas.clone()),
+                Name::new("TreePart"),
+            ));
+            commands.spawn((
+                Sprite3d {
+                    image: images.image.clone(),
+                    pixels_per_metre: 16.,
+                    transform: Transform::from_xyz(
+                        TRACK_SPACING * (TRACK_POSITION.x + x - TRACK_BOUNDS),
+                        TRACK_SPACING * (TRACK_POSITION.y + y + TILE_SIZE * i as f32),
+                        TRACK_SPACING * (TRACK_POSITION.z + z),
+                    ),
+                    ..default()
+                }
+                .bundle_with_atlas(&mut sprite_params, atlas.clone()),
+                Name::new("TreePart"),
+            ));
+        }
     };
 
     for p in points {
-        commands.spawn((
-            Sprite3d {
-                image: images.image.clone(),
-                pixels_per_metre: 16.,
-                transform: Transform::from_xyz(
-                    TRACK_SPACING * (TRACK_POSITION.x + p.x + TRACK_BOUNDS),
-                    TRACK_SPACING * (TRACK_POSITION.y + p.y),
-                    TRACK_SPACING * (TRACK_POSITION.z + p.z),
-                ),
-                ..default()
-            }
-            .bundle_with_atlas(&mut sprite_params, atlas.clone()),
-            Name::new("Tree"),
-        ));
-        commands.spawn((
-            Sprite3d {
-                image: images.image.clone(),
-                pixels_per_metre: 16.,
-                transform: Transform::from_xyz(
-                    TRACK_SPACING * (TRACK_POSITION.x + p.x - TRACK_BOUNDS),
-                    TRACK_SPACING * (TRACK_POSITION.y + p.y),
-                    TRACK_SPACING * (TRACK_POSITION.z + p.z),
-                ),
-                ..default()
-            }
-            .bundle_with_atlas(&mut sprite_params, atlas.clone()),
-            Name::new("Tree"),
-        ));
+        entity((p.x, p.y, p.z), 1, 0, 4);
     }
 }

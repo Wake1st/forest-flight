@@ -61,8 +61,7 @@ fn spawn_camera(
                 },
                 Skybox {
                     image: skybox_handle.clone(),
-                    brightness: 1000.0,
-                    // ..default()
+                    brightness: 10.0,
                 },
                 BloomSettings {
                     intensity: 0.3,
